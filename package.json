@@ -41,14 +41,14 @@
     ],
     "win": {
       "target": "nsis",
-      "icon": "img/icon.ico"
+      "icon": "assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     },
     "publish": {
-      "repo": "ZERO-kill-console",
+      "repo": "zero-killconsole-sc",
       "owner": "Cromzz",
       "provider": "github",
       "releaseType": "release"
