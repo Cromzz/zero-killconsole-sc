@@ -18,10 +18,10 @@
     "bits-ui": "^2.8.13",
     "concurrently": "^8.2.2",
     "electron": "^37.2.4",
+    "electron-builder": "^26.0.12",
     "svelte": "^5.35.5",
     "vite": "^7.0.4",
-    "wait-on": "^7.2.0",
-    "electron-builder": "^26.0.12"
+    "wait-on": "^7.2.0"
   },
   "build": {
     "appId": "com.ZERO.killconsole",
@@ -60,12 +60,13 @@
     }
   },
   "dependencies": {
-    "lucide-svelte": "^0.526.0",
-    "ps-list": "^8.1.1",
+    "animate.css": "^4.1.1",
     "electron-store": "^10.1.0",
     "electron-updater": "^6.6.2",
-    "google-tts-api": "^2.0.2"
-  },  
+    "google-tts-api": "^0.0.6",
+    "lucide-svelte": "^0.526.0",
+    "ps-list": "^8.1.1"
+  },
   "description": "This template should help get you started developing with Svelte in Vite.",
   "author": "",
   "license": "ISC"
