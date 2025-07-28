@@ -63,6 +63,7 @@ function createOverlayWindow() {
     transparent: true, 
     alwaysOnTop: true,
     autoHideMenuBar: true,
+    skipTaskbar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,  // Disable Node.js integration in the renderer process
@@ -77,6 +78,7 @@ function createOverlayWindow() {
   overlayWindow.on('blur', () => {
     overlayWindow.setBackgroundColor("#00000000");
     console.log("blur");
+
   });
 
   overlayWindow.on('focus', () => {
