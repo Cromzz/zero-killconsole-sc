@@ -59,10 +59,10 @@ function createOverlayWindow() {
   // Create the browser window with better security settings
   overlayWindow = new BrowserWindow({
     fullscreen: true,
-    frame: false,    
+    frame: true,   
     transparent: true, 
-    alwaysOnTop: true,         //  Remove native frame
-    titleBarStyle: 'hidden',  
+    alwaysOnTop: true,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
       nodeIntegration: false,  // Disable Node.js integration in the renderer process
@@ -75,18 +75,21 @@ function createOverlayWindow() {
   });
 
   overlayWindow.on('blur', () => {
-    overlayWindow.setBackgroundColor("#00000000")
+    overlayWindow.setBackgroundColor("#00000000");
+    console.log("blur");
   });
 
   overlayWindow.on('focus', () => {
-    overlayWindow.setBackgroundColor("#00000000")
+    overlayWindow.setBackgroundColor("#00000000");
+    console.log("focus");
   });
+
+
 
   // Show window when it's ready to prevent flickering
   overlayWindow.once('ready-to-show', () => {
     overlayWindow.show()
   });
-
 
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
   overlayWindow.loadFile('overlay.html');
