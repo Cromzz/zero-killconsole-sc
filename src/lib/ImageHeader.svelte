@@ -16,7 +16,7 @@ function changeImage(image) {
     setTimeout(() => {
         animate = 'animate__animated animate__fadeIn';
         currentImage = image;
-    }, 100);
+    }, 50);
 
 }
 
@@ -29,7 +29,7 @@ function changeImage(image) {
         <div onclick={() => changeImage(headerImage3)} class="w-4 h-4 rounded-full bg-black/50 hover:bg-zinc-300 cursor-pointer transition-all duration-300"></div>
         <div onclick={() => changeImage(headerImage4)} class="w-4 h-4 rounded-full bg-black/50 hover:bg-zinc-300 cursor-pointer transition-all duration-300"></div>
     </div>
-    <div class="w-full p-1 h-64 bg-center bg-center bg-cover {animate}" style="background-image: url({getCurrentImage()})">
+    <div class="w-full p-1 h-64 bg-black bg-center bg-center bg-cover {animate}" style="background-image: url({getCurrentImage()})">
 
     </div>
     <div class="mt-2 text-[6px] text-gray-400 p-2 absolute left-0 bottom-0">

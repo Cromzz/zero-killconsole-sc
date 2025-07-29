@@ -1,5 +1,6 @@
 <script>
     import Button from './Button.svelte'
+    import ButtonStatus from './ButtonStatus.svelte'
 // electronAPI.onKillEvent((data) => {
 //     speakTTS(data.killerName + ' killed ' + data.victimName + ' with ' + data.weaponName);
 //     const container = document.getElementById('kills');
@@ -52,14 +53,20 @@
 
 </script>
 
-<div id="toggle" class="pb-1 flex justify-center items-center space-x-2" >
-    <Button label="Kills"/>
-    <Button label="Incaps"/>
-    <Button label="NPC"/>
+<div id="toggle" class="pb-1 flex justify-between items-center space-x-2" >
+    <div class="flex space-x-1">
+        <Button label="KILLS" class="w-16"/>
+        <Button label="INCAPS" class="w-16"/>
+        <Button label="NPC" class="w-16"/>
+    </div>
+    <div class="flex space-x-2">
+        <ButtonStatus ActiveLabel="Overlay" InactiveLabel="Overlay" status={true} class="w-28"/>
+        <ButtonStatus ActiveLabel="Logging" InactiveLabel="Stopped" status={true} spinner={true} class="w-28 flex justify-between items-center gap-1"/>
+    </div>
 </div>
 
 <div class="event flex h-24 justify-left items-center space-x-1 text-lg rounded relative rounded bg-gradient-to-tr from-indigo-900 to-indigo-800 hover:cursor-pointer">
-    <div class="p-1 w-10 -rotate-[20deg] h-10 m-1 ml-2 rounded relative flex justify-around p-1">
+    <div class="p-1 w-8 h-8 -rotate-[20deg] m-1 ml-2 rounded relative flex justify-around p-1">
         <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 512 512"><circle cx="256" cy="56" r="56"/><path d="M464 128H48v52h144l-32 325.13 51 6.87 21.65-192h47.02L301 512l51-6.98L320 180h144v-52z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -79,7 +86,7 @@
 </div>    
 
 <div class="event flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -89,7 +96,7 @@
 </div>
 
 <div class="event flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -99,7 +106,7 @@
 </div>
 
 <div class="event flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -109,7 +116,7 @@
 </div>
 
 <div class="event flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -119,7 +126,7 @@
 </div>
 
 <div class="event flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -129,7 +136,7 @@
 </div>
 
 <div class="event flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -139,7 +146,7 @@
 </div>
 
 <div class="event opacity-75 flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
@@ -149,7 +156,7 @@
 </div>
 
 <div class="event opacity-50  flex h-12 justify-left items-center space-x-1 text-lg rounded relative bg-gradient-to-tr from-red-900 to-red-800 shadow duration-300 transition-all hover:cursor-pointer">
-    <div class="p-1 m-1 w-10 h-10 m-1 ml-2">
+    <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
     <span class="text-[1rem]">
