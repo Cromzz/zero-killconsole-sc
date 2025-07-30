@@ -63,7 +63,7 @@
     "animate.css": "^4.1.1",
     "electron-store": "^10.1.0",
     "electron-updater": "^6.6.2",
-    "google-tts-api": "^0.0.6",
+    "google-tts-api": "^2.0.2",
     "lucide-svelte": "^0.526.0",
     "ps-list": "^8.1.1"
   },

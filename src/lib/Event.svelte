@@ -1,6 +1,8 @@
 <script>
     import Button from './Button.svelte'
     import ButtonStatus from './ButtonStatus.svelte'
+    import TTSAudio from './TTSAudio.svelte'
+
 // electronAPI.onKillEvent((data) => {
 //     speakTTS(data.killerName + ' killed ' + data.victimName + ' with ' + data.weaponName);
 //     const container = document.getElementById('kills');
@@ -51,7 +53,50 @@
 //   container.replaceWith(div);
 // });
 
+let overlayState = $state(false);
+let overlayStatus = $state('Overlay');
+
+const handleOverlayToggle = async () => {
+    // @ts-ignore
+    if (overlayState) {
+        window.electronAPI.closeOverlay()
+    } else {   
+        const isRunning = await window.electronAPI.openOverlay()
+        if (!isRunning) {
+            overlayState = false;
+            overlayStatus = "SC not running"
+            setTimeout(() => {
+                overlayStatus = "Overlay"
+            }, 1000);
+            return;
+        }
+    }
+    overlayState = !overlayState;
+}
+
+let ttsStatus =  $state(false);
+let speakTTS = $state('');
+
+const handleTTSToggle = async () => {
+    // @ts-ignore
+    if (ttsStatus) {
+        ttsStatus = false;
+        speakTTS = '';
+        return;
+    } else {   
+        ttsStatus = true;
+        speakTTS = 'Text to Speech Enabled';
+    }
+}
+
+const SpeakTTS = (text) => {
+    speakTTS = text;
+}
+
 </script>
+
+ <TTSAudio text={speakTTS}/>
+
 
 <div id="toggle" class="pb-1 flex justify-between items-center space-x-2" >
     <div class="flex space-x-1">
@@ -60,8 +105,9 @@
         <Button label="NPC" class="w-16"/>
     </div>
     <div class="flex space-x-2">
-        <ButtonStatus ActiveLabel="Overlay" InactiveLabel="Overlay" status={true} class="w-28"/>
-        <ButtonStatus ActiveLabel="Logging" InactiveLabel="Stopped" status={true} spinner={true} class="w-28 flex justify-between items-center gap-1"/>
+        <ButtonStatus onclick={handleOverlayToggle} ActiveLabel={overlayStatus} InactiveLabel={overlayStatus} status={overlayState} spinner={false} externalcheck={true} class="w-28 flex justify-center items-center"/>
+        <ButtonStatus onclick={handleTTSToggle} ActiveLabel="TTS" InactiveLabel="TTS Off" status={ttsStatus} spinner={true} externalcheck={true} class="w-28 flex justify-between items-center gap-1"/>
+        <ButtonStatus ActiveLabel="Logging" InactiveLabel="Logging" status={false} spinner={true} class="w-28 flex justify-between items-center gap-1"/>
     </div>
 </div>
 

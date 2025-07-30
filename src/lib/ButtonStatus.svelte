@@ -1,18 +1,30 @@
 <script>
 
-
     const props = $props();  
+
     let toggledState = $state(false || props.status);
     let toggleSpinner = $state(false || props.spinner);
+    let externalcheck = $state(false || props.externalcheck);
     
     function handleClick(event) {
-        toggledState = !toggledState;
+        if (!externalcheck) {
+            toggledState = !toggledState;
+        }
         
         if (typeof props.onclick === 'function') {
             props.onclick(event);
+            console.log(event);
         }
     }
 
+    $effect(() => {
+        if (props.status) {
+            toggledState = true;
+        } else {
+            toggledState = false;
+        }
+    });
+    
     </script>
       
     <button onclick={handleClick} class="{props.class} {toggledState ? 'ring-2 ring-emerald-400 bg-emerald-800' : 'bg-stone-700'} hover:bg-stone-600 text-sm text-white py-1 px-2 rounded-sm duration-300 transition-all">
@@ -32,22 +44,23 @@
         {#if !toggledState}
             {props.InactiveLabel}
         {/if}
+        
     </button>
     
     <style>
-    .switch-light {
-        animation: pulse-light 0.2s infinite ease-in;
-    }
-    
-    @keyframes pulse-light {
-        0% {
-            opacity: 1;
+        .switch-light {
+            animation: pulse-light 0.2s infinite ease-in;
         }
-        50% {
-            opacity: 0.3;
+        
+        @keyframes pulse-light {
+            0% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.2;
+            }
+            100% {
+                opacity: 1;
+            }
         }
-        100% {
-            opacity: 1;
-        }
-    }
     </style>

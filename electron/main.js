@@ -3,6 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import psList from 'ps-list';
 
+import googleTTS from 'google-tts-api';
+
+
+
 // Get directory name in ES module
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -86,8 +90,6 @@ function createOverlayWindow() {
     console.log("focus");
   });
 
-
-
   // Show window when it's ready to prevent flickering
   overlayWindow.once('ready-to-show', () => {
     overlayWindow.show()
@@ -108,6 +110,7 @@ ipcMain.handle('open-overlay', async () => {
   for (const process of processes) {
     if (process.name === 'StarCitizen.exe') {
       console.log("we good bro", process.name, process.pid);
+      if (overlayWindow) overlayWindow.destroy();
       app.whenReady().then(createOverlayWindow);
       return true;
     }
@@ -115,6 +118,16 @@ ipcMain.handle('open-overlay', async () => {
 
   console.log("StarCitizen is not running");
   return false;
+});
+
+ipcMain.handle('get-tts-url', async (event, text) => {
+    const base64 = await googleTTS.getAudioBase64(text, {
+      lang: 'en',
+      slow: false,
+      host: 'https://translate.google.com'
+    });
+    return `data:audio/mp3;base64,${base64}`;
+
 });
 
 ipcMain.on('close-overlay', async () => {

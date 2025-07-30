@@ -9,7 +9,6 @@ const api = {
     // Window control
     windowControl: (action) => ipcRenderer.send('window-control', action),
     
-  
     // You can expose specific APIs here if needed
     // For example:
     // send: (channel, data) => ipcRenderer.send(channel, data),
@@ -18,6 +17,7 @@ const api = {
     getAppVersion: () => ipcRenderer.invoke('get-version'),
     openOverlay: () => ipcRenderer.invoke('open-overlay'),
     closeOverlay: () => ipcRenderer.send('close-overlay'),
+    getTTSUrl: (text) => ipcRenderer.invoke('get-tts-url', text),
 
     // Example of exposing process.versions
     versions: {
