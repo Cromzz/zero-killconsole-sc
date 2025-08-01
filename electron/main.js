@@ -2,8 +2,9 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import psList from 'ps-list';
-
+import { splitEntriesByTimestamp, parseKillEntry, parseIncapEntry } from './logParser.js';
 import googleTTS from 'google-tts-api';
+import config_store from './storage.js'
 
 
 
@@ -152,6 +153,24 @@ ipcMain.handle('get-version', async () => {
   return app.getVersion();
 });
 
+ipcMain.handle('get-settings', async () => {
+    return {
+      gameDirectory: config_store.get('gameDirectory'),
+      ttsLanguage: config_store.get('ttsLanguage'),
+      apiKey: config_store.get('apiKey'),
+      ttsVolume: config_store.get('ttsVolume')
+    };
+});
+
+ipcMain.handle('save-settings', async (event, settings) => {
+    console.log(settings);
+    config_store.set('gameDirectory', settings.gameDirectory);
+    config_store.set('ttsLanguage', settings.ttsLanguage);
+    config_store.set('apiKey', settings.apiKey);
+    config_store.set('ttsVolume', settings.ttsVolume);
+    return true;
+}); 
+
 ipcMain.on('window-control', (event, action) => {
   const win = BrowserWindow.getFocusedWindow();
   if (!win) return;
@@ -164,3 +183,98 @@ ipcMain.on('window-control', (event, action) => {
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);  
 });
+
+
+
+///////////// LOG READER /////////////
+
+let lastSize = 0;
+let mainWindow = null;
+const processedEntries = new Set();
+
+let LOG_FILE_PATH = config_store.get('gameDirectory') ? 
+path.resolve(config_store.get('gameDirectory') + '/LIVE/Game.log') : '';
+
+
+setInterval(() => {
+  //readNewLogData();
+}, 1000);
+
+
+function readNewLogData() {
+  sendStatusUpdate('Reading... ' + LOG_FILE_PATH);
+  
+  fs.stat(LOG_FILE_PATH, (err, stats ) => {
+    if (err) {
+      sendStatusUpdate('Log file not found: ' + LOG_FILE_PATH, true);
+      return;
+    }
+    
+    // On first run, set initial size and don't read anything
+    if (lastSize === 0) {
+      lastSize = stats.size;
+      sendStatusUpdate(`Watching log file: ${LOG_FILE_PATH}`);
+      return;
+    }
+    
+    // Handle log rotation (file became smaller)
+    if (stats.size < lastSize) {
+      sendStatusUpdate('Log file rotated, resetting...');
+      lastSize = 0;
+      return;
+    }
+    
+    // Only read if there's new content
+    if (stats.size > lastSize) {
+      const stream = fs.createReadStream(LOG_FILE_PATH, {
+        start: lastSize,
+        end: stats.size,
+        encoding: 'utf-8',
+      });
+  
+      let leftover = '';
+  
+      stream.on('data', (chunk) => {
+        const data = leftover + chunk;
+        const entries = splitEntriesByTimestamp(data);
+        sendStatusUpdate('Processing log entries... ' + LOG_FILE_PATH);
+        for (const entry of entries) {
+          if (entry.includes('killed by') && !entry.includes('_NPC_')) {
+            const killInfo = parseKillEntry(entry);
+            if (killInfo) {
+              const uniqueKey = killInfo.timestamp + "KILL" +killInfo.killerName + Math.random()*1000;
+  
+              if (!processedEntries.has(uniqueKey)) {
+                processedEntries.add(uniqueKey);
+                mainWindow.webContents.send('kill-event', killInfo);
+              }
+            }
+          }
+          if (entry.includes('<Spawn Flow> CSCPlayerPUSpawningComponent::UnregisterFromExternalSystems')) {
+            const incapInfo = parseIncapEntry(entry);
+            if (incapInfo) {
+              const uniqueKey = incapInfo.timestamp + "INCAP" +incapInfo.victimName + Math.random()*1000;
+  
+              if (!processedEntries.has(uniqueKey)) {
+                processedEntries.add(uniqueKey);
+              mainWindow.webContents.send('incap-event', incapInfo);
+              }
+            }
+          }
+        }
+    });
+  
+      stream.on('end', () => {
+        lastSize = stats.size;
+      });
+  
+      stream.on('error', (error) => {
+        sendStatusUpdate('Stream read error', true);
+      });
+    }
+  });
+}
+
+function sendStatusUpdate(message, error = false) {
+  mainWindow.webContents.send('status-update', { message, error });
+}

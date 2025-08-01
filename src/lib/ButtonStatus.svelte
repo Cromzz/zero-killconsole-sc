@@ -27,13 +27,13 @@
     
     </script>
       
-    <button onclick={handleClick} class="{props.class} {toggledState ? 'ring-2 ring-emerald-400 bg-emerald-800' : 'bg-stone-700'} hover:bg-stone-600 text-sm text-white py-1 px-2 rounded-sm duration-300 transition-all">
+    <button onclick={handleClick} class="{props.class} {toggledState ? 'ring-2 ring-emerald-400 bg-emerald-800' : 'bg-zinc-700'} hover:bg-zinc-600 text-sm text-white py-1 px-2 rounded-sm duration-300 transition-all">
         
         {#if toggleSpinner}
             <div class="flex space-x-1 items-center">
-                <span class="w-1 h-3 rounded-sm {toggledState ? 'switch-light bg-emerald-400' : 'bg-stone-900/40 shadow-inner'}"></span>
-                <span class="w-1 h-4 rounded-sm {toggledState ? 'switch-light bg-emerald-400' : 'bg-stone-900/40 shadow-inner'}"></span>
-                <span class="w-1 h-3 rounded-sm {toggledState ? 'switch-light bg-emerald-400' : 'bg-stone-900/40 shadow-inner'}"></span>          
+                <span class="w-1 h-3 rounded-sm {toggledState ? 'switch-light bg-emerald-400' : 'bg-zinc-900/40 shadow-inner'}"></span>
+                <span class="w-1 h-4 rounded-sm {toggledState ? 'switch-light bg-emerald-400' : 'bg-zinc-900/40 shadow-inner'}"></span>
+                <span class="w-1 h-3 rounded-sm {toggledState ? 'switch-light bg-emerald-400' : 'bg-zinc-900/40 shadow-inner'}"></span>          
             </div>
         {/if}
 

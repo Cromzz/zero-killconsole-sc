@@ -18,6 +18,9 @@ const api = {
     openOverlay: () => ipcRenderer.invoke('open-overlay'),
     closeOverlay: () => ipcRenderer.send('close-overlay'),
     getTTSUrl: (text) => ipcRenderer.invoke('get-tts-url', text),
+    getSettings: (settings) => ipcRenderer.invoke('get-settings', settings),
+    saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+    sendStatusUpdate: (message, error = false) => ipcRenderer.send('status-update', { message, error }),
 
     // Example of exposing process.versions
     versions: {

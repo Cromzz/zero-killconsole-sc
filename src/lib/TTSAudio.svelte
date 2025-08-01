@@ -17,7 +17,7 @@
   function playAudio(dataUrl) {
     audio?.pause();
     audio = new Audio(dataUrl);
-    audio.volume = 1.0;
+    audio.volume = 0.4;
     audio.play().catch(err => {
       console.warn("Autoplay failed:", err);
     });
