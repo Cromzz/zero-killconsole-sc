@@ -1,13 +1,17 @@
-<script>
+<script lang="ts">
 import 'animate.css';
 import Button from './Button.svelte';
 import { onMount } from 'svelte';
+
+
+const { onclose } = $props<{ onclose: () => void }>();
 
 let settings = $state({});
 let local_gamepath = $state('');
 let local_ttsLanguage = $state('');
 let local_volume = $state(0);
 let local_apiKey = $state('');
+
 
 onMount(async () => {
     window.electronAPI.getSettings().then((settings_config) => {
@@ -20,6 +24,12 @@ onMount(async () => {
     })  
 })
 
+
+function handleSettingsClose() {
+    console.log("closing from inside")
+    onclose();
+}
+
 function handleGamePathChange(event) {
     local_gamepath = event.target.value;
 }
@@ -29,7 +39,7 @@ function handleTtsLanguageChange(event) {
 }
 
 function handleVolumeChange(event) {
-    local_volume = Math.max(0, Math.min(1, event.target.value));
+    local_volume = event.target.value;
 }
 
 function handleApiKeyChange(event) {
@@ -44,6 +54,7 @@ async function handleSaveSettings() {
         apiKey: local_apiKey
     }).then(() => {
         console.log('Settings saved successfully');
+        handleSettingsClose();
     }).catch((error) => {
         console.error('Failed to save settings:', error);
     });
@@ -51,7 +62,7 @@ async function handleSaveSettings() {
 </script>
 
 <div id="settingsModal" class="animate__animated animate__fadeIn bg-black/50 backdrop-blur backdrop-grayscale absolute z-50 inset-0 flex justify-center items-center shadow-lg">
-    <div class="bg-zinc-900 p-4 rounded-sm max-w-3xl w-4/5 h-2/3 rounded-lg flex flex-col justify-between gap-4 relative">
+    <div class="bg-zinc-900 p-4 rounded-sm max-w-3xl w-4/5 h-2/3 rounded-lg flex flex-col justify-between gap-4 relative ring-4 ring-zinc-800">
         <div class="flex flex-col">
             <div class="w-full h-32 bg-cover bg-center rounded-sm absolute top-0 left-0 z-0 p-4" style="background-image: url('https://i.imgur.com/O9d0FnA.png')">
 
@@ -79,8 +90,8 @@ async function handleSaveSettings() {
             </div>
 
             <div class="mt-4">
-                <label for="" class="text-white text-lg">TTS Volume ({local_volume * 100}%)</label>
-                <input type="range" class="w-full h-12 accent-red-800 p-2 text-md font-thin bg-zinc-800" min="0" max="1" step="0.01" value={local_volume} oninput={handleVolumeChange} />          
+                <label for="" class="text-white text-lg">TTS Volume ({local_volume}%)</label>
+                <input type="range" class="w-full h-12 accent-red-800 p-2 text-md font-thin bg-zinc-800" min="0" max="100" step="1" value={local_volume} oninput={handleVolumeChange} />          
             </div>
 
             <div class="mt-4">

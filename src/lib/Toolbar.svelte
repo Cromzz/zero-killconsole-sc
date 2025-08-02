@@ -28,7 +28,7 @@ const handleWindowControlClose = () => {
 </script>
 
 {#if showSettingsModal}
-<SettingsModal/>
+<SettingsModal onclose={() => showSettingsModal = false} />
 {/if}
 
   <div class="absolute sticky top-0 left-0 right-0 drag-bar flex justify-between items-center bg-stone-900 p-2 z-50">
@@ -40,6 +40,6 @@ const handleWindowControlClose = () => {
     <div class="flex space-x-2 no-drag">
       <ButtonToggle onclick={handleSettingsClick} label="Settings" icon="" />
       <Button onclick={handleWindowControlMin} label="" icon="minimize" />
-      <Button onclick={handleWindowControlMin} label="" icon="close" />
+      <Button onclick={handleWindowControlClose} label="" icon="close" />
     </div>
 </div>
