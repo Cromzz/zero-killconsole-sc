@@ -11,7 +11,7 @@ let local_gamepath = $state('');
 let local_ttsLanguage = $state('');
 let local_volume = $state(0);
 let local_apiKey = $state('');
-
+let local_overlayPosition = $state('');
 
 onMount(async () => {
     window.electronAPI.getSettings().then((settings_config) => {
@@ -20,7 +20,7 @@ onMount(async () => {
             local_ttsLanguage = settings.ttsLanguage;
             local_volume = settings.ttsVolume;
             local_apiKey = settings.apiKey;
-            console.log(settings);
+            local_overlayPosition = settings.overlayPosition;
     })  
 })
 
@@ -45,12 +45,18 @@ function handleApiKeyChange(event) {
     local_apiKey = event.target.value;
 }
 
+function handleOverlayPositionChange(event) {
+    local_overlayPosition = event.target.value;
+}
+
 async function handleSaveSettings() {
     await window.electronAPI.saveSettings({
         gameDirectory: local_gamepath,
         ttsLanguage: local_ttsLanguage,
         ttsVolume: local_volume,
-        apiKey: local_apiKey
+        apiKey: local_apiKey,
+        overlayPosition: local_overlayPosition
+
     }).then(() => {
         console.log('Settings saved successfully');
         handleSettingsClose();
@@ -61,7 +67,7 @@ async function handleSaveSettings() {
 </script>
 
 <div id="settingsModal" class="animate__animated animate__fadeIn bg-black/50 backdrop-blur backdrop-grayscale absolute z-50 inset-0 flex justify-center items-center shadow-lg">
-    <div class="bg-zinc-900 p-4 rounded-sm max-w-3xl w-4/5 h-2/3 rounded-lg flex flex-col justify-between gap-4 relative ring-4 ring-zinc-800">
+    <div class="bg-zinc-900 p-4 rounded-sm max-w-3xl w-4/5 h-5/6 rounded-lg flex flex-col justify-between gap-4 relative ring-4 ring-zinc-800">
         <div class="flex flex-col">
             <div class="w-full h-32 bg-cover bg-center rounded-sm absolute top-0 left-0 z-0 p-4" style="background-image: url('https://i.imgur.com/O9d0FnA.png')">
 
@@ -90,7 +96,21 @@ async function handleSaveSettings() {
 
             <div class="mt-4">
                 <label for="" class="text-white text-lg">TTS Volume ({local_volume}%)</label>
-                <input type="range" class="w-full h-12 accent-red-800 p-2 text-md font-thin bg-zinc-800" min="0" max="100" step="1" value={local_volume} oninput={handleVolumeChange} />          
+                <input type="range" class="w-full h-12 accent-red-800 p-2 text-md font-thin bg-zinc-800" min="0" max="100" step="1" value={local_volume} oninput={handleVolumeChange} />        
+                <p class="text-zinc-400 text-sm">Change the volume of the TTS</p>  
+            </div>
+
+            <div class="mt-4">
+                <label for="" class="text-white text-lg">Overlay Position</label>
+                <select type="text" spellcheck="false" placeholder="" oninput={handleOverlayPositionChange} value={local_overlayPosition} class="w-full h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600">
+                    <option value="Bottom Right">Bottom Right</option>
+                    <option value="Bottom Left">Bottom Left</option>
+                    <option value="Bottom Center">Bottom Center</option>
+                    <option value="Top Center">Top Center</option>
+                    <option value="Top Right">Top Right</option>
+                    <option value="Top Left">Top Left</option>
+                </select>
+                <p class="text-zinc-400 text-sm">Change the position of the overlay</p>
             </div>
 
             <div class="mt-4">

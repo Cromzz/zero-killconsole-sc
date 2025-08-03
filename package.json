@@ -48,7 +48,6 @@
       "createStartMenuShortcut": true,
       "runAfterFinish": true
     },
-    
     "publish": {
       "repo": "zero-killconsole-sc",
       "owner": "Cromzz",
@@ -72,13 +71,15 @@
     "wait-on": "^7.2.0"
   },
   "dependencies": {
+    "@types/uuid": "^10.0.0",
     "animate.css": "^4.1.1",
     "electron-store": "^10.1.0",
     "electron-updater": "^6.6.2",
     "google-tts-api": "^2.0.2",
     "lucide-svelte": "^0.526.0",
     "moment": "^2.30.1",
-    "ps-list": "^8.1.1"
+    "ps-list": "^8.1.1",
+    "uuid": "^11.1.0"
   },
   "description": "This app is a kill console for Star Citizen",
   "author": "Cromzz",

@@ -4,18 +4,18 @@
     import TTSAudio from './TTSAudio.svelte'
     import moment from 'moment';
     import MinsAgo from './MinsAgo.svelte';
+    import { v4 as uuidv4 } from 'uuid';
 
     let killEvents = $state([]);
     let incapEvents = $state([]);
 
     window.electronAPI.onKillEvent((data) => {
-        killEvents.push(data);
-        SpeakTTS(data.killerName + ' killed ' + data.victimName + ' with ' + data.weaponName);
+        killEvents = [{ ...data, id: uuidv4(), isNew: true }, ...killEvents];
+        SpeakTTS(data.killerName + ' killed ' + data.victimName + ' with a ' + data.weaponName);
     })
 
     window.electronAPI.onIncapEvent((data) => {
-        console.log("we got an incap")
-        incapEvents.push(data);
+        incapEvents = [{ ...data, id: uuidv4(), isNew: true }, ...incapEvents];
         SpeakTTS(data.victimName + ' was incapacitated near you');
     })
 
@@ -57,7 +57,7 @@ const handleTTSToggle = async () => {
     } else {   
         ttsStatus = true;
         window.electronAPI.setTTSStatus(true);
-        speakTTS = 'Text to Speech isEnabled';
+        speakTTS = 'Text to Speech is Enabled';
     }
 }
 
@@ -81,6 +81,21 @@ const handleLoggingToggle = async () => {
         window.electronAPI.setLoggingStatus(true);
     }
 }
+
+let incapPos = $state(0);
+
+const handleIncapPosRight = () => {
+    incapPos++;
+}
+
+const handleIncapPosLeft = () => {
+    incapPos--;
+}
+
+const handleIncapPosReset = () => {
+    incapPos = 0;
+}
+
 
 
 
@@ -106,7 +121,7 @@ const handleLoggingToggle = async () => {
     <div class="p-1 w-8 h-8 -rotate-[20deg] m-1 ml-2 rounded relative flex justify-around p-1">
         <svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 512 512"><circle cx="256" cy="56" r="56"/><path d="M464 128H48v52h144l-32 325.13 51 6.87 21.65-192h47.02L301 512l51-6.98L320 180h144v-52z"/></svg>
     </div>
-    {#each incapEvents as incap}
+    {#each incapEvents.slice(incapPos, incapPos) as incap}
     <span class="text-[1rem]">
         <span class="victim text-emerald-400 font-bold">{incap.victimName}</span> 
         <span>{incap.victimName}</span>was incapacitated near you.<span>
@@ -116,10 +131,10 @@ const handleLoggingToggle = async () => {
     {/each}
 
     <div class="flex justify-center items-center absolute bottom-0 right-0 p-1">
-      <div class="bg-black/20 p-0.5 rounded hover:bg-indigo-600 duration-300 transition-all">
+      <div onclick={handleIncapPosLeft} class="bg-black/20 p-0.5 rounded hover:bg-indigo-600 duration-300 transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="duration-100 transition-all hover:scale-110 lucide lucide-chevron-left-icon lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>
       </div>
-      <div class="bg-black/20 p-0.5 rounded hover:bg-indigo-600 duration-300 transition-all">
+      <div onclick={handleIncapPosRight} class="bg-black/20 p-0.5 rounded hover:bg-indigo-600 duration-300 transition-all">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="duration-100 transition-all hover:scale-110 lucide lucide-chevron-right-icon lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>
       </div>  
     </div>

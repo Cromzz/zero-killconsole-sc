@@ -81,6 +81,10 @@ function createOverlayWindow() {
         webviewTag: false        // Disable webview tag for security
       },
     });
+
+    overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
+    overlayWindow.setAlwaysOnTop(true, 'screen-saver', 1);
+    
     overlayWindow.webContents.openDevTools({ mode: 'detach' });
   } catch (error) {
     console.error('Failed to create overlay window:', error);
@@ -97,7 +101,6 @@ function createOverlayWindow() {
 
   // Show window when it's ready to prevent flickering
   overlayWindow.once('ready-to-show', () => {
-    console.log("Overlay window ready to show");
     overlayWindow.show()
   });
 
@@ -124,7 +127,7 @@ ipcMain.handle('open-overlay', async () => {
 
 ipcMain.handle('get-tts-url', async (event, text) => {
     const base64 = await googleTTS.getAudioBase64(text, {
-      lang: 'en',
+      lang: config_store.get('ttsLanguage') || 'en',
       slow: false,
       host: 'https://translate.google.com'
     });
@@ -159,7 +162,8 @@ ipcMain.handle('get-settings', async () => {
       gameDirectory: config_store.get('gameDirectory'),
       ttsLanguage: config_store.get('ttsLanguage'),
       apiKey: config_store.get('apiKey'),
-      ttsVolume: config_store.get('ttsVolume')
+      ttsVolume: config_store.get('ttsVolume'),
+      overlayPosition: config_store.get('overlayPosition')
     };
 });
 
@@ -169,6 +173,7 @@ ipcMain.handle('save-settings', async (event, settings) => {
     config_store.set('ttsLanguage', settings.ttsLanguage);
     config_store.set('apiKey', settings.apiKey);
     config_store.set('ttsVolume', settings.ttsVolume);
+    config_store.set('overlayPosition', settings.overlayPosition);
     return true;
 }); 
 
@@ -180,6 +185,10 @@ ipcMain.on('set-tts-status', async (event, status) => {
     config_store.set('ttsStatus', status);
 });
 
+ipcMain.handle('get-tts-volume', async () => {
+  return config_store.get('ttsVolume');
+});
+
 ipcMain.handle('get-logging-status', async () => {
     return config_store.get('loggingStatus');
 });
@@ -187,6 +196,7 @@ ipcMain.handle('get-logging-status', async () => {
 ipcMain.on('set-logging-status', async (event, status) => {
     config_store.set('loggingStatus', status);
 });
+
 
 ipcMain.on('window-control', (event, action) => {
   const win = BrowserWindow.getFocusedWindow();
@@ -204,8 +214,6 @@ ipcMain.on('window-control', (event, action) => {
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);  
 });
-
-
 
 ///////////// LOG READER /////////////
 
@@ -272,7 +280,7 @@ function readNewLogData() {
               if (!processedEntries.has(uniqueKey)) {
                 processedEntries.add(uniqueKey);
                 win.webContents.send('kill-event', killInfo);
-                overlayWindow.webContents.send('kill-event', killInfo);
+                if (overlayWindow) overlayWindow.webContents.send('kill-event', killInfo);
               }
             }
           }
@@ -284,8 +292,7 @@ function readNewLogData() {
               if (!processedEntries.has(uniqueKey)) {
                 processedEntries.add(uniqueKey);
                 win.webContents.send('incap-event', incapInfo);
-                overlayWindow.webContents.send('incap-event', incapInfo);
-
+                if (overlayWindow) overlayWindow.webContents.send('incap-event', incapInfo);
               }
             }
           }

@@ -21,6 +21,8 @@ const api = {
     getTTSUrl: (text) => ipcRenderer.invoke('get-tts-url', text),
     getTTSStatus: (status) => ipcRenderer.invoke('get-tts-status', status),
     setTTSStatus: (status) => ipcRenderer.send('set-tts-status', status),
+    getTTSVolume: (volume) => ipcRenderer.invoke('get-tts-volume', volume),
+    
 
     getLoggingStatus: (status) => ipcRenderer.invoke('get-logging-status', status),
     setLoggingStatus: (status) => ipcRenderer.send('set-logging-status', status),

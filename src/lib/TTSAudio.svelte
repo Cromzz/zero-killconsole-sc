@@ -4,11 +4,11 @@
   const props = $props();
   let audio = null;
 
+  let volume = $state(1.0);
 
   $effect(() => {
     if (props.text) {
         electronAPI.getTTSUrl(props.text).then((dataUrl) => {
-          console.log("Received base64 audio", dataUrl  );
           playAudio(dataUrl);
         });
     }
@@ -17,7 +17,9 @@
   function playAudio(dataUrl) {
     audio?.pause();
     audio = new Audio(dataUrl);
-    audio.volume = 0.4;
+    window.electronAPI.getTTSVolume().then((volume) => {
+      audio.volume = volume / 100;
+    });
     audio.play().catch(err => {
       console.warn("Autoplay failed:", err);
     });
