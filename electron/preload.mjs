@@ -17,10 +17,28 @@ const api = {
     getAppVersion: () => ipcRenderer.invoke('get-version'),
     openOverlay: () => ipcRenderer.invoke('open-overlay'),
     closeOverlay: () => ipcRenderer.send('close-overlay'),
+
     getTTSUrl: (text) => ipcRenderer.invoke('get-tts-url', text),
+    getTTSStatus: (status) => ipcRenderer.invoke('get-tts-status', status),
+    setTTSStatus: (status) => ipcRenderer.send('set-tts-status', status),
+
+    getLoggingStatus: (status) => ipcRenderer.invoke('get-logging-status', status),
+    setLoggingStatus: (status) => ipcRenderer.send('set-logging-status', status),
+
     getSettings: (settings) => ipcRenderer.invoke('get-settings', settings),
     saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
-    sendStatusUpdate: (message, error = false) => ipcRenderer.send('status-update', { message, error }),
+    
+    onStatusUpdate: (callback) => ipcRenderer.on('status-update', (event, data) => {
+      callback(data)}
+    ),
+
+    onKillEvent: (callback) => ipcRenderer.on('kill-event', (event, data) => {
+      callback(data)}
+    ),
+
+    onIncapEvent: (callback) => ipcRenderer.on('incap-event', (event, data) => {
+      callback(data)}
+    ),
 
     // Example of exposing process.versions
     versions: {

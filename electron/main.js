@@ -1,7 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import psList from 'ps-list';
 import { splitEntriesByTimestamp, parseKillEntry, parseIncapEntry } from './logParser.js';
 import googleTTS from 'google-tts-api';
 import config_store from './storage.js'
@@ -46,8 +46,8 @@ function createWindow() {
 
   // Load the app
   const startUrl = isDev 
-    ? 'http://localhost:5173' 
-    : `file://${path.join(__dirname, '../dist/index.html')}`;
+    ? 'http://localhost:5173?window=main' 
+    : `file://${path.join(__dirname, '../dist/index.html?window=main')}`;
 
   win.loadURL(startUrl).catch(err => {
     console.error('Failed to load URL:', err);
@@ -61,44 +61,54 @@ function createWindow() {
 }
 
 function createOverlayWindow() {
-  // Create the browser window with better security settings
-  overlayWindow = new BrowserWindow({
-    fullscreen: true,
-    frame: true,   
-    transparent: true, 
-    alwaysOnTop: true,
-    autoHideMenuBar: true,
-    skipTaskbar: true,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
-      nodeIntegration: false,  // Disable Node.js integration in the renderer process
-      contextIsolation: true,  // Enable context isolation
-      enableRemoteModule: false, // Disable remote module
-      sandbox: false,          // Required for some nodeIntegration features
-      webSecurity: true,       // Enable web security
-      webviewTag: false        // Disable webview tag for security
-    },
-  });
-
+  try {
+    console.log("Creating overlay window");
+    // Create the browser window with better security settings
+    overlayWindow = new BrowserWindow({
+      fullscreen: true, //prod true
+      frame: true,   
+      transparent: true, //prod true
+      alwaysOnTop: true, //prod true
+      autoHideMenuBar: true, //prod true
+      skipTaskbar: true,
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.mjs'),
+        nodeIntegration: false,  // Disable Node.js integration in the renderer process
+        contextIsolation: true,  // Enable context isolation
+        enableRemoteModule: false, // Disable remote module
+        sandbox: false,          // Required for some nodeIntegration features
+        webSecurity: true,       // Enable web security
+        webviewTag: false        // Disable webview tag for security
+      },
+    });
+    overlayWindow.webContents.openDevTools({ mode: 'detach' });
+  } catch (error) {
+    console.error('Failed to create overlay window:', error);
+    app.quit();
+  }
+  
   overlayWindow.on('blur', () => {
     overlayWindow.setBackgroundColor("#00000000");
-    console.log("blur");
-
   });
 
   overlayWindow.on('focus', () => {
-    overlayWindow.setBackgroundColor("#00000000");
-    console.log("focus");
+    overlayWindow.setBackgroundColor("#00000000");        
   });
 
   // Show window when it's ready to prevent flickering
   overlayWindow.once('ready-to-show', () => {
+    console.log("Overlay window ready to show");
     overlayWindow.show()
   });
 
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
-  overlayWindow.loadFile('overlay.html');
 
+  const startUrl = isDev ? 'http://localhost:5173/index.html?window=overlay' : `file://${path.join(__dirname, '../dist/index.html?window=overlay')}`;
+
+  overlayWindow.loadURL(startUrl).catch(err => {
+    console.error('Failed to load URL:', err);
+    app.quit();
+  }); 
 }
 
 // initialization and is ready to create browser windows.
@@ -106,19 +116,10 @@ app.whenReady().then(createWindow);
 
 ipcMain.handle('open-overlay', async () => {
   //check if sc.exe is running
-  const processes = await psList();
+  //TODO: implement check for star citizen process which matches build
+  createOverlayWindow();
+  return true;
 
-  for (const process of processes) {
-    if (process.name === 'StarCitizen.exe') {
-      console.log("we good bro", process.name, process.pid);
-      if (overlayWindow) overlayWindow.destroy();
-      app.whenReady().then(createOverlayWindow);
-      return true;
-    }
-  }
-
-  console.log("StarCitizen is not running");
-  return false;
 });
 
 ipcMain.handle('get-tts-url', async (event, text) => {
@@ -163,7 +164,7 @@ ipcMain.handle('get-settings', async () => {
 });
 
 ipcMain.handle('save-settings', async (event, settings) => {
-    console.log(settings);
+
     config_store.set('gameDirectory', settings.gameDirectory);
     config_store.set('ttsLanguage', settings.ttsLanguage);
     config_store.set('apiKey', settings.apiKey);
@@ -171,12 +172,32 @@ ipcMain.handle('save-settings', async (event, settings) => {
     return true;
 }); 
 
+ipcMain.handle('get-tts-status', async () => {
+    return config_store.get('ttsStatus');
+});
+
+ipcMain.on('set-tts-status', async (event, status) => {
+    config_store.set('ttsStatus', status);
+});
+
+ipcMain.handle('get-logging-status', async () => {
+    return config_store.get('loggingStatus');
+});
+
+ipcMain.on('set-logging-status', async (event, status) => {
+    config_store.set('loggingStatus', status);
+});
+
 ipcMain.on('window-control', (event, action) => {
   const win = BrowserWindow.getFocusedWindow();
   if (!win) return;
 
   if (action === 'minimize') win.minimize();
-  else if (action === 'close') win.close(); // removed maximize
+  else if (action === 'close')
+  {
+    win.close();
+    overlayWindow.close();
+  }  // removed maximize
 });
 
 // Handle any uncaught exceptions
@@ -189,16 +210,20 @@ process.on('uncaughtException', (error) => {
 ///////////// LOG READER /////////////
 
 let lastSize = 0;
-let mainWindow = null;
 const processedEntries = new Set();
 
 let LOG_FILE_PATH = config_store.get('gameDirectory') ? 
-path.resolve(config_store.get('gameDirectory') + '/LIVE/Game.log') : '';
+path.resolve(config_store.get('gameDirectory') + '/Game.log') : '';
 
 
 setInterval(() => {
-  //readNewLogData();
-}, 1000);
+  if (config_store.get('loggingStatus')) {
+    readNewLogData(); 
+  }
+  else {
+    sendStatusUpdate('Logging stopped');
+  }
+}, 500);
 
 
 function readNewLogData() {
@@ -239,14 +264,15 @@ function readNewLogData() {
         const entries = splitEntriesByTimestamp(data);
         sendStatusUpdate('Processing log entries... ' + LOG_FILE_PATH);
         for (const entry of entries) {
-          if (entry.includes('killed by') && !entry.includes('_NPC_')) {
+          if (entry.includes('killed by') || entry.includes('_NPC_')) {
             const killInfo = parseKillEntry(entry);
             if (killInfo) {
               const uniqueKey = killInfo.timestamp + "KILL" +killInfo.killerName + Math.random()*1000;
   
               if (!processedEntries.has(uniqueKey)) {
                 processedEntries.add(uniqueKey);
-                mainWindow.webContents.send('kill-event', killInfo);
+                win.webContents.send('kill-event', killInfo);
+                overlayWindow.webContents.send('kill-event', killInfo);
               }
             }
           }
@@ -257,7 +283,9 @@ function readNewLogData() {
   
               if (!processedEntries.has(uniqueKey)) {
                 processedEntries.add(uniqueKey);
-              mainWindow.webContents.send('incap-event', incapInfo);
+                win.webContents.send('incap-event', incapInfo);
+                overlayWindow.webContents.send('incap-event', incapInfo);
+
               }
             }
           }
@@ -276,5 +304,5 @@ function readNewLogData() {
 }
 
 function sendStatusUpdate(message, error = false) {
-  mainWindow.webContents.send('status-update', { message, error });
+  win.webContents.send('status-update', { message, error });
 }

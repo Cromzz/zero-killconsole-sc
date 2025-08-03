@@ -32,9 +32,10 @@ function parseKillEntry(entry) {
       killerName: match[3],
       killerId: match[4],
       weapon: weaponRaw,
-      weaponName: getFriendlyName(weaponRaw),
+      weaponName: getFriendlyName(weaponRaw.replace(/_\d+$/, "")),
       damageType: match[6],
       raw: entry,
+      type: 'kill'
     };
   }
 
@@ -53,6 +54,7 @@ function parseIncapEntry(entry) {
       timestamp: timestampMatch[1],
       victimName: match[1],
       raw: entry,
+      type: 'incap'
     };
   }
 

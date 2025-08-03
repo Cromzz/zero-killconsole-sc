@@ -24,9 +24,8 @@ onMount(async () => {
     })  
 })
 
-
 function handleSettingsClose() {
-    console.log("closing from inside")
+    //close the modal from parent
     onclose();
 }
 
@@ -75,7 +74,7 @@ async function handleSaveSettings() {
             <div class="mt-4">
                 <label for="" class="text-white text-lg">Star Citizen Path</label>
                 <input type="text" spellcheck="false" placeholder="" oninput={handleGamePathChange} value={local_gamepath} class="w-full h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600" />
-                <p class="text-zinc-400 text-sm">This is the location for your star citizen LIVE folder exists</p>
+                <p class="text-zinc-400 text-sm">Paste the location of your star citizen LIVE folder</p>
             </div>
 
             <div class="mt-4">
@@ -86,7 +85,7 @@ async function handleSaveSettings() {
                     <option value="de">German</option>
                     <option value="es">Spanish</option>
                 </select>
-                    <p class="text-zinc-400 text-sm">Translation to be implemented later</p>
+                    <p class="text-zinc-400 text-sm">Translation to be implemented at a later stage</p>
             </div>
 
             <div class="mt-4">
