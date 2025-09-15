@@ -6,7 +6,7 @@ const { autoUpdater } = require('electron-updater');
 function setupAutoUpdater(win) {
      
     autoUpdater.forceDevUpdateConfig = true;
-    autoUpdater.autoDownload = false;
+    autoUpdater.autoDownload = true;
 
     autoUpdater.on('check-for-updates', () => {
       console.log('Checking for update...');

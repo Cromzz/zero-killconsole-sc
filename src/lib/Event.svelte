@@ -8,8 +8,7 @@
     import MinsAgo from './MinsAgo.svelte';
     import { v4 as uuidv4 } from 'uuid';
 
-    let killEvents = $state([
-    ]);
+    let killEvents = $state([]);
 
     let incapEvents = $state([]);
     let ttsStatus = $state(false);
