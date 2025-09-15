@@ -5,7 +5,14 @@ import { fileURLToPath } from 'node:url';
 import { splitEntriesByTimestamp, parseKillEntry, parseIncapEntry } from './logParser.js';
 import googleTTS from 'google-tts-api';
 import config_store from './storage.js'
+import {getCurrentGroupCode, generateNewCode, getGroupServerStatus, toggleStatus} from './wsClient.js'
+import { setupAutoUpdater } from './autoUpdater.js'; // adjust path accordingly
 
+import * as Sentry from "@sentry/electron";
+
+Sentry.init({
+  dsn: "https://1376b8e9d9c581b8c352e8c0e7a095ee@o4509951484166144.ingest.de.sentry.io/4509951486263376",
+});
 
 
 // Get directory name in ES module
@@ -36,6 +43,8 @@ function createWindow() {
     },
   });
 
+  setupAutoUpdater(win);
+  startGroupServerOnStartup(); // check if group server was left running.
   // Show window when it's ready to prevent flickering
   win.once('ready-to-show', () => {
     win.show()
@@ -57,10 +66,15 @@ function createWindow() {
   // Handle window being closed
   win.on('closed', () => {
     win.destroy();
+    if (overlayWindow)
+      {
+        overlayWindow.destroy();
+      }
   });
 }
 
 function createOverlayWindow() {
+
   try {
     console.log("Creating overlay window");
     // Create the browser window with better security settings
@@ -85,7 +99,7 @@ function createOverlayWindow() {
     overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
     overlayWindow.setAlwaysOnTop(true, 'screen-saver', 1);
     
-    overlayWindow.webContents.openDevTools({ mode: 'detach' });
+    //overlayWindow.webContents.openDevTools({ mode: 'detach' });
   } catch (error) {
     console.error('Failed to create overlay window:', error);
     app.quit();
@@ -102,6 +116,10 @@ function createOverlayWindow() {
   // Show window when it's ready to prevent flickering
   overlayWindow.once('ready-to-show', () => {
     overlayWindow.show()
+  });
+
+  overlayWindow.on('close', () => {
+    overlayWindow.destroy();
   });
 
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
@@ -197,7 +215,6 @@ ipcMain.on('set-logging-status', async (event, status) => {
     config_store.set('loggingStatus', status);
 });
 
-
 ipcMain.on('window-control', (event, action) => {
   const win = BrowserWindow.getFocusedWindow();
   if (!win) return;
@@ -206,7 +223,7 @@ ipcMain.on('window-control', (event, action) => {
   else if (action === 'close')
   {
     win.close();
-    overlayWindow.close();
+    if (overlayWindow) overlayWindow.close();
   }  // removed maximize
 });
 
@@ -215,6 +232,35 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);  
 });
 
+
+// GROUP CODE FETCH AND SAVE
+
+ipcMain.handle('get-group-server-status', async () => {
+  return getGroupServerStatus();
+});
+
+ipcMain.handle('get-group-code', async () => {
+  return getCurrentGroupCode();
+});
+
+ipcMain.handle('toggle-group-status', async () => {
+  console.log("trigger status toggle")
+  const status = toggleStatus();
+  config_store.set('groupStatus', status);
+  return status;
+
+}); 
+
+ipcMain.handle('generate-group-code', async () => {
+  const newCode = generateNewCode();
+  return newCode;
+});
+
+function startGroupServerOnStartup() {
+  if (config_store.get('groupStatus')) {
+    toggleStatus(false);
+  }
+}
 ///////////// LOG READER /////////////
 
 let lastSize = 0;
@@ -231,10 +277,12 @@ setInterval(() => {
   else {
     sendStatusUpdate('Logging stopped');
   }
-}, 500);
+}, 100);
 
-
+let currentlyReading = false;
 function readNewLogData() {
+  if (currentlyReading) return;
+  currentlyReading = true;
   sendStatusUpdate('Reading... ' + LOG_FILE_PATH);
   
   fs.stat(LOG_FILE_PATH, (err, stats ) => {
@@ -308,8 +356,11 @@ function readNewLogData() {
       });
     }
   });
+  currentlyReading = false;
 }
 
+
 function sendStatusUpdate(message, error = false) {
+  if (!win) return; // needed in case window hasnt been created yet
   win.webContents.send('status-update', { message, error });
 }

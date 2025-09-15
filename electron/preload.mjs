@@ -42,6 +42,24 @@ const api = {
       callback(data)}
     ),
 
+    // Update handling
+    onUpdateCheck: (callback) => ipcRenderer.on('update-checking', () => callback()),
+
+    onUpdateAvailable: (callback) => ipcRenderer.on('update-available', (event, data) => {
+      callback(data)}
+    ),
+    onUpdateError: (callback) => ipcRenderer.on('update-error', (event, data) => {
+      callback(data)}
+    ),
+    onDownloadProgress: (callback) => ipcRenderer.on('update-download-progress', (_event, data) => {
+      callback(data);
+    }),
+    
+    getGroupServerStatus: (status) => ipcRenderer.invoke('get-group-server-status', status),
+    getGroupCode: (code) => ipcRenderer.invoke('get-group-code', code),
+    toggleStatus: (status) => ipcRenderer.invoke('toggle-group-status', status),
+    generateGroupCode: (code) => ipcRenderer.invoke('generate-group-code', code),
+
     // Example of exposing process.versions
     versions: {
       node: process.versions.node,

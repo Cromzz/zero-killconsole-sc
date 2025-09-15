@@ -27,9 +27,9 @@ function parseKillEntry(entry) {
     const weaponRaw = match[5];
     return {
       timestamp: timestampMatch[1],
-      victimName: match[1],
+      victimName: getFriendlyName(match[1].replace(/_\d+$/, "")),
       victimId: match[2],
-      killerName: match[3],
+      killerName: getFriendlyName(match[3].replace(/_\d+$/, "")),
       killerId: match[4],
       weapon: weaponRaw,
       weaponName: getFriendlyName(weaponRaw.replace(/_\d+$/, "")),

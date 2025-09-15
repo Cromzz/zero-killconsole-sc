@@ -9,7 +9,9 @@ const config_store = new Store({
     ttsVolume: 0.5,
     overlayState: false,
     ttsStatus: false,
-    overlayPosition: 'Bottom Right'
+    overlayPosition: 'Bottom Right',
+    groupStatus: false,
+    groupCode: 'TESTCODE'
   }
 });
 
