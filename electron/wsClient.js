@@ -118,10 +118,26 @@ function toggleStatus(force)
   return status
 }
 
+function sendRemoteGroupEvent(event, data) {
+  if (status && roomCode) {
+    ws.send(JSON.stringify({ type: "event", event, data, code: roomCode }));
+    console.log("sent remote event", event, data);
+  }
+}
+
+function onRemoteGroupEvent(callback) {
+  if (!status) {
+    console.error("Cannot listen for remote events when not connected to group server");
+    return;
+  }
+}
+
 export {
   connect,
   getCurrentGroupCode,
   generateNewCode,
   getGroupServerStatus,
-  toggleStatus
+  toggleStatus,
+  sendRemoteGroupEvent,
+  onRemoteGroupEvent
 }

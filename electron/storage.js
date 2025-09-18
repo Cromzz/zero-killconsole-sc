@@ -11,7 +11,7 @@ const config_store = new Store({
     ttsStatus: false,
     overlayPosition: 'Bottom Right',
     groupStatus: false,
-    groupCode: 'TESTCODE'
+    groupCode: ''
   }
 });
 

@@ -79,13 +79,13 @@ async function handleSaveSettings() {
             <p class="text-white text-md">All the important things</p>
             <div class="mt-4">
                 <label for="" class="text-white text-lg">Star Citizen Path</label>
-                <input type="text" spellcheck="false" placeholder="" oninput={handleGamePathChange} value={local_gamepath} class="w-full h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600" />
+                <input type="text" spellcheck="false" placeholder="" oninput={handleGamePathChange} value={local_gamepath} class="w-full bg-zinc-800 h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600" />
                 <p class="text-zinc-400 text-sm">Paste the location of your star citizen LIVE folder</p>
             </div>
 
             <div class="mt-4">
                 <label for="" class="text-white text-lg">TTS Language</label>
-                <select type="text" spellcheck="false" placeholder="" oninput={handleTtsLanguageChange} value={local_ttsLanguage} class="w-full h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600">
+                <select type="text" spellcheck="false" placeholder="" oninput={handleTtsLanguageChange} value={local_ttsLanguage} class="w-full bg-zinc-800 h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600">
                     <option value="en">English</option>
                     <option value="fr">French</option>
                     <option value="de">German</option>
@@ -96,13 +96,13 @@ async function handleSaveSettings() {
 
             <div class="mt-4">
                 <label for="" class="text-white text-lg">TTS Volume ({local_volume}%)</label>
-                <input type="range" class="w-full h-12 accent-red-800 p-2 text-md font-thin bg-zinc-800" min="0" max="100" step="1" value={local_volume} oninput={handleVolumeChange} />        
+                <input type="range" class="w-full h-12 bg-zinc-800 accent-red-800 p-2 text-md font-thin bg-zinc-800" min="0" max="100" step="1" value={local_volume} oninput={handleVolumeChange} />        
                 <p class="text-zinc-400 text-sm">Change the volume of the TTS</p>  
             </div>
 
             <div class="mt-4">
                 <label for="" class="text-white text-lg">Overlay Position</label>
-                <select type="text" spellcheck="false" placeholder="" oninput={handleOverlayPositionChange} value={local_overlayPosition} class="w-full h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600">
+                <select type="text" spellcheck="false" placeholder="" oninput={handleOverlayPositionChange} value={local_overlayPosition} class="w-full bg-zinc-800 h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600">
                     <option value="Bottom Right">Bottom Right</option>
                     <option value="Bottom Left">Bottom Left</option>
                     <option value="Bottom Center">Bottom Center</option>
@@ -115,8 +115,8 @@ async function handleSaveSettings() {
 
             <div class="mt-4">
                 <label for="" class="text-white text-lg">ZERO API Key</label>
-                <input type="password" spellcheck="false" placeholder="" value={local_apiKey} class="w-full h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600" oninput={handleApiKeyChange} />
-                <p class="text-zinc-400 text-sm">Required for other ZERO services, only for VIPs</p>
+                <input type="password" spellcheck="false" placeholder="" value={local_apiKey} disabled class="w-full bg-zinc-800 h-12 p-2 text-md font-thin rounded-sm focus:outline-none focus:border-b-2 focus:border-red-600" oninput={handleApiKeyChange} />
+                <p class="text-zinc-400 text-sm">Required for other ZERO services, only for VIPs (currently not used)</p>
             </div>
         </div>
         <Button  class="w-full h-16 text-xl" label="" icon="save" onclick={handleSaveSettings}/>

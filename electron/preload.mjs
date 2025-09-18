@@ -60,6 +60,11 @@ const api = {
     toggleStatus: (status) => ipcRenderer.invoke('toggle-group-status', status),
     generateGroupCode: (code) => ipcRenderer.invoke('generate-group-code', code),
 
+    sendRemoteGroupEvent: (event, data) => ipcRenderer.send('remote-event', { event, data }),
+    onRemoteGroupEvent: (callback) => ipcRenderer.on('remote-event', (event, data) => {
+      callback(data);
+    }),
+
     // Example of exposing process.versions
     versions: {
       node: process.versions.node,

@@ -12,6 +12,7 @@
     let groupServerStatus = $state(false);
     let groupServerStatusLabel = $state('Verifying...');
     let groupServerStatusStyle = $state('text-yellow-500 font-bold');
+    let groupPasteState = $state('paste');
   
     function handleGroupSettings() {
       onclose();
@@ -20,6 +21,10 @@
     function handleCopyGroupCode() { 
       if (groupCode && groupCode.length === 8) {
         navigator.clipboard.writeText(groupCode).then(() => {
+          groupPasteState = "paste-check";
+          setTimeout(() => {
+            groupPasteState = "paste"; //reset icon after 1 second
+          }, 1000);
         }).catch(err => {
           console.error('Could not copy text: ', err);
         });
@@ -102,7 +107,7 @@
           <Button
             class="w-16 h-16 absolute left-2 rounded hover:bg-zinc-600"
             label=""
-            icon="paste"
+            icon={groupPasteState}
             onclick={handleCopyGroupCode}
           />
           <div class="flex gap-2 text-4xl uppercase font-mono tracking-[0.1em]">
@@ -138,7 +143,7 @@
         </div>
         <div class="space-y-2">
           <p class="text-white text-md font-light">
-            Enter a groups code below to join an existing group.
+            Enter another group's code below to join an existing group.
           </p>
           <input
             type="text"
@@ -154,9 +159,8 @@
       <!-- Footer -->
       <div class="flex justify-between items-center">
         <p class="text-zinc-400 text-xs">
-          This feature is currently experimental, by using this feature you
-          acknowledge that this feature may gather information to help improve this
-          service in the future and monitor fair use.
+          This feature is experimental and opt in, however this feature may gather information to help improve the
+          service in the future and is used to assist the monitoring of fair use.
         </p>
       </div>
       <Button
