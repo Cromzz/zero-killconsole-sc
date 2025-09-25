@@ -1,5 +1,7 @@
 <script>
-import { onMount } from 'svelte';
+// @ts-nocheck
+
+import { onDestroy, onMount } from 'svelte';
 // @ts-ignore
 import ButtonToggle from './ButtonToggle.svelte'
 import Button from './Button.svelte'
@@ -14,17 +16,32 @@ let showSettingsModal = $state(false);
 let showUpdateModal = $state(false);
 let showGroupModal = $state(false);
 let settings = $state({});
+let updatepercent = $state(0.00);
 
 onMount(async () => {
     version = await window.electronAPI.getAppVersion();
-    console.log("checking for updates...");
-    const updateInfo = await window.electronAPI.checkForUpdates();
-    if (updateInfo && updateInfo.updateAvailable) {
-        updateAvailable = updateInfo;
-        console.log("Update available:", updateInfo);
-    } else {
-        console.log("No updates available.");
-    }
+    settings = await window.electronAPI.getSettings();
+
+    window.electronAPI.onUpdateAvailable(() => {
+        updateAvailable = true;
+
+    });
+    window.electronAPI.onDownloadProgress((progress) => {
+        updatepercent = progress.percent.toFixed(2);
+    });
+
+    window.electronAPI.onUpdateDownloaded(() => {
+        updatepercent = 100;
+        setTimeout(() => {
+            showUpdateModal = false;
+        }, 1000);
+    });
+});
+
+onDestroy(() => {
+    window.electronAPI.removeUpdateAvailableListener();
+    window.electronAPI.removeDownloadProgressListener();
+    window.electronAPI.removeUpdateDownloadedListener();
 });
 
 const handleSettingsClick = () => {
@@ -55,6 +72,10 @@ const handleGroupClick = () => {
 
 {#if showGroupModal}
 <GroupModal onclose={() => showGroupModal = false} />
+{/if}
+
+{#if showUpdateModal}
+    <UpdateModal percent={updatepercent} onclose={() => showUpdateModal = false} />
 {/if}
 
   <div class="absolute sticky top-0 left-0 right-0 drag-bar flex justify-between items-center bg-stone-900 p-2 z-50">
