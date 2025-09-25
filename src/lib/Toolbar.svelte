@@ -17,9 +17,14 @@ let settings = $state({});
 
 onMount(async () => {
     version = await window.electronAPI.getAppVersion();
-
-    updateAvailable = await window.electronAPI.onUpdateAvailable();
-    console.log(updateAvailable);
+    console.log("checking for updates...");
+    const updateInfo = await window.electronAPI.checkForUpdates();
+    if (updateInfo && updateInfo.updateAvailable) {
+        updateAvailable = updateInfo;
+        console.log("Update available:", updateInfo);
+    } else {
+        console.log("No updates available.");
+    }
 });
 
 const handleSettingsClick = () => {
@@ -59,9 +64,21 @@ const handleGroupClick = () => {
         <span id="version" class="text-white text-xs font-bold bg-red-800 rounded-sm px-2 py-1">v{version}</span>
     </div>
     <div class="flex space-x-2 no-drag">
+        {#if updateAvailable}
+            <ButtonToggle onclick={() => showUpdateModal = true} label="Update Available!" icon="update" />
+        {/if}
         <Button onclick={handleGroupClick} label=" " icon="group" />
         <ButtonToggle onclick={handleSettingsClick} label="Settings" icon="" />
         <Button onclick={handleWindowControlMin} label="" icon="minimize" />
         <Button onclick={handleWindowControlClose} label="" icon="close" />
     </div>
 </div>
+
+<style>
+.drag-bar {
+    -webkit-app-region: drag;
+}
+.no-drag {
+    -webkit-app-region: no-drag;
+}
+</style>

@@ -24,16 +24,24 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 let win; //this is the handle for our main window
 let overlayWindow; //this is the handle for our overlay window
 
+const getPreloadPath = () => {
+  // When packaged, extraResources copy is placed in process.resourcesPath (next to app.asar)
+  // During development, preload lives under electron/preload.mjs (relative to __dirname)
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'preload.mjs')
+    : path.join(__dirname, 'preload.mjs');
+}
+
 function createWindow() {
   // Create the browser window with better security settings
   win = new BrowserWindow({
     width: 800,
     height: 1200,
     resizable: true,          //  Disable resizing
-    frame: true,              //  Remove native frame
+    frame: false,              //  Remove native frame
     titleBarStyle: 'default',  
     webPreferences: {
-      preload: path.join(__dirname, 'preload.mjs'),
+      preload: getPreloadPath(),        // <-- changed
       nodeIntegration: false,  // Disable Node.js integration in the renderer process
       contextIsolation: true,  // Enable context isolation
       enableRemoteModule: false, // Disable remote module
@@ -43,8 +51,17 @@ function createWindow() {
     },
   });
 
-  setupAutoUpdater(win);
-  startGroupServerOnStartup(); // check if group server was left running.
+  try {
+    setupAutoUpdater(win);
+  } catch (error) {
+    console.error('Failed to setup auto updater:', error);
+  }
+  try {
+    startGroupServerOnStartup(); // check if group server was left running.
+  } catch (error) {
+    console.error('Failed to start group server on startup:', error);
+  }
+
   // Show window when it's ready to prevent flickering
   win.once('ready-to-show', () => {
     win.show()
@@ -80,13 +97,13 @@ function createOverlayWindow() {
     // Create the browser window with better security settings
     overlayWindow = new BrowserWindow({
       fullscreen: true, //prod true
-      frame: true,   
+      frame: false,   
       transparent: true, //prod true
       alwaysOnTop: true, //prod true
       autoHideMenuBar: true, //prod true
       skipTaskbar: true,
       webPreferences: {
-        preload: path.join(__dirname, 'preload.mjs'),
+        preload: getPreloadPath(), 
         nodeIntegration: false,  // Disable Node.js integration in the renderer process
         contextIsolation: true,  // Enable context isolation
         enableRemoteModule: false, // Disable remote module

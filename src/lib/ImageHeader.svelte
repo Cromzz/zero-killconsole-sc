@@ -45,6 +45,9 @@ window.electronAPI.onStatusUpdate((data) => {
     <div class="w-full p-1 h-64 bg-black bg-center bg-center bg-cover {animate}" style="background-image: url({getCurrentImage()})">
 
     </div>
+    <div class="text-[6px] opacity-20 p-2 text-black absolute right-0 top-0">
+      <span id="file-read-info">"Image Title" - by Author</span>
+    </div>
     <div class="mt-2 text-[12px] opacity-40 text-gray-100 p-2 absolute left-0 bottom-0">
       <span id="file-read-info">{message}</span>
     </div>

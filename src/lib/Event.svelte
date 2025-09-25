@@ -144,8 +144,14 @@ const handleIncapPosRight = () => {
           <span class="absolute top-0 right-0 px-2 text-[0.8rem]"><MinsAgo minsAgo={incapEvents[incapPos].timestamp}/></span>
         </span>
     </span>
+    {:else}
+    <span class="incap text-[1rem]">
+        <span class="victim text-emerald-400 font-bold"></span> 
+        <span>No incapacitated events detected yet.
+          <span class="absolute top-0 right-0 px-2 text-[0.8rem]"></span>
+        </span>
+    </span>
     {/if}
-
 
     <div class="flex justify-center items-center absolute bottom-0 right-0 p-1 no-select space-x-1">
       <!-- svelte-ignore a11y_click_events_have_key_events -->
