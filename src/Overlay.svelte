@@ -13,11 +13,12 @@
       'Top Left': 'top-[18rem] left-0',
     });
 
+  
   onMount(async () => {
     let settings = await window.electronAPI.getSettings();
     overlayPosition = overlayPositionTranslate[settings.overlayPosition || 'Bottom Right'];
   });
-  
+
   let overlayPosition = $state(overlayPositionTranslate['Bottom Right']);
 
   window.electronAPI.onKillEvent((data) => {

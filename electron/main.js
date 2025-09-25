@@ -99,9 +99,8 @@ function createOverlayWindow() {
       fullscreen: true, //prod true
       frame: false,   
       transparent: true, //prod true
-      alwaysOnTop: true, //prod true
       autoHideMenuBar: true, //prod true
-      skipTaskbar: true,
+      skipTaskbar: false,
       webPreferences: {
         preload: getPreloadPath(), 
         nodeIntegration: false,  // Disable Node.js integration in the renderer process
@@ -113,30 +112,33 @@ function createOverlayWindow() {
       },
     });
 
+        overlayWindow.setAlwaysOnTop(true, 'pop-up-menu');
     overlayWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
-    overlayWindow.setAlwaysOnTop(true, 'screen-saver', 1);
-    
-    //overlayWindow.webContents.openDevTools({ mode: 'detach' });
+    //overlayWindow.webContents.openDevTools({ mode: 'detach' }); //dev only
+
   } catch (error) {
     console.error('Failed to create overlay window:', error);
     app.quit();
   }
   
   overlayWindow.on('blur', () => {
-    overlayWindow.setBackgroundColor("#00000000");
+    overlayWindow.focus(); //needed to hide top white task bar when alt-tabbing
   });
 
   overlayWindow.on('focus', () => {
-    overlayWindow.setBackgroundColor("#00000000");        
+    overlayWindow.setBackgroundColor("#00000000"); //needed to hide top white task bar when alt-tabbing     
   });
 
   // Show window when it's ready to prevent flickering
   overlayWindow.once('ready-to-show', () => {
-    overlayWindow.show()
+    overlayWindow.show();
+    overlayWindow.moveTop(); //needed for linux
+    overlayWindow.focus(); //needed for linux
   });
 
   overlayWindow.on('close', () => {
     overlayWindow.destroy();
+    overlayWindow = false;
   });
 
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
@@ -345,7 +347,8 @@ function readNewLogData() {
               if (!processedEntries.has(uniqueKey)) {
                 processedEntries.add(uniqueKey);
                 win.webContents.send('kill-event', killInfo);
-                if (overlayWindow) overlayWindow.webContents.send('kill-event', killInfo);
+                //causing issues on some systems, needs more testing
+                if (overlayWindow.isVisible()) overlayWindow.webContents.send('kill-event', killInfo);
               }
             }
           }
