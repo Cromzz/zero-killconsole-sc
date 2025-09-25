@@ -20,7 +20,14 @@
                 <p class="text-white text-3xl">Update Available!</p>
                 <p class="text-white text-md">We've got a new update available!</p>
             </div>
-            <div><progress class="w-full rounded-full" value={percent} max="100"></progress></div>
+            {#if percent == 100.00}
+            <p class="text-white text-md">Update downloaded successfully, restart your application to apply the changes.</p>
+            {:else}
+            <div class="w-full flex items-center gap-2">
+                <progress class="w-full rounded-full" value={percent} max="100"></progress>
+                <p>{percent}%</p>
+            </div>
+            {/if}
         </div>
     </div>
     

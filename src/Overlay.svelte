@@ -1,6 +1,7 @@
 <script>
   import OverlayEvent from './lib/OverlayEvent.svelte'
   import { v4 as uuidv4 } from 'uuid';
+  import { onMount, onDestroy } from 'svelte';
   
   let events = $state([]);
 
@@ -12,6 +13,11 @@
       'Top Left': 'top-[18rem] left-0',
     });
 
+  onMount(async () => {
+    let settings = await window.electronAPI.getSettings();
+    overlayPosition = overlayPositionTranslate[settings.overlayPosition || 'Bottom Right'];
+  });
+  
   let overlayPosition = $state(overlayPositionTranslate['Bottom Right']);
 
   window.electronAPI.onKillEvent((data) => {

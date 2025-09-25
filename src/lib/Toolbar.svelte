@@ -24,14 +24,15 @@ onMount(async () => {
 
     window.electronAPI.onUpdateAvailable(() => {
         updateAvailable = true;
-
     });
+
     window.electronAPI.onDownloadProgress((progress) => {
         updatepercent = progress.percent.toFixed(2);
     });
 
     window.electronAPI.onUpdateDownloaded(() => {
         updatepercent = 100;
+        
         setTimeout(() => {
             showUpdateModal = false;
         }, 1000);
@@ -74,7 +75,7 @@ const handleGroupClick = () => {
 <GroupModal onclose={() => showGroupModal = false} />
 {/if}
 
-{#if showUpdateModal}
+{#if updateAvailable}
     <UpdateModal percent={updatepercent} onclose={() => showUpdateModal = false} />
 {/if}
 
