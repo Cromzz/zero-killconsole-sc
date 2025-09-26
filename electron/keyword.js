@@ -21,6 +21,11 @@ const terms = {
     'klwe_lmg_energy_01' : 'Demaco Energy LMG',
     'ksar_smg_energy_01' : 'Custodian SMG',
     'gmni_shotgun_ballistic' : 'R97 Shotgun',
+    'klwe_rifle_energy_01' : 'Scalpel Rifle',
+    'ksar_pistol_energy_01' : 'LH86 Pistol',
+    'klwe_lmg_energy_01_purple_blue01' : 'Demaco Energy LMG',
+    'gmni_lmg_ballistic_01' : 'F-55 LMG',
+    'utfl_melee_01_red01_gungame ' : 'Red Knife',
     
     // Add more as needed
   };
