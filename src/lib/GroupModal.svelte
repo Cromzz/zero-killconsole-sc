@@ -199,7 +199,7 @@ function updateGroupStatus(status) {
           {/if}
         </div>
       </div>
-
+      <Button  class="w-full h-16 text-xl" label="Close" icon="" onclick={handleGroupSettings}/>
     </div>
 
   </div>
