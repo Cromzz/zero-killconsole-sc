@@ -24,7 +24,7 @@
             <p class="text-white text-md">Update downloaded successfully, restart your application to apply the changes.</p>
             {:else}
             <div class="w-full flex items-center gap-2">
-                <progress class="w-full rounded-full" value={percent} max="100"></progress>
+                <progress class="w-full rounded-full transition-all duration-1000" value={percent} max="100"></progress>
                 <p>{percent}%</p>
             </div>
             {/if}

@@ -14,6 +14,7 @@ const api = {
     // send: (channel, data) => ipcRenderer.send(channel, data),
     // receive: (channel, func) => ipcRenderer.on(channel, (event, ...args) => func(...args)),
     
+    
     getAppVersion: () => ipcRenderer.invoke('get-version'),
     openOverlay: () => ipcRenderer.invoke('open-overlay'),
     closeOverlay: () => ipcRenderer.send('close-overlay'),
@@ -58,9 +59,17 @@ const api = {
     getGroupServerStatus: (status) => ipcRenderer.invoke('get-group-server-status', status),
     getGroupCode: (code) => ipcRenderer.invoke('get-group-code', code),
     toggleStatus: (status) => ipcRenderer.invoke('toggle-group-status', status),
+    
+    //generate a new group code
     generateGroupCode: (code) => ipcRenderer.invoke('generate-group-code', code),
+    
+    //set a specific group code
+    setGroupCode: (code) => ipcRenderer.invoke('set-group-code', code),
 
+    // Remote group event handling
     sendRemoteGroupEvent: (event, data) => ipcRenderer.send('remote-event', { event, data }),
+
+    // Listen for remote group events
     onRemoteGroupEvent: (callback) => ipcRenderer.on('remote-event', (event, data) => {
       callback(data);
     }),

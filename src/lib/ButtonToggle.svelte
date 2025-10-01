@@ -18,7 +18,7 @@
 
     </script>
       
-    <button onclick={handleClick} class="{toggledState ? ' bg-green-700 hover:bg-green-800' : ' bg-stone-700 hover:bg-red-800'} text-sm text-white py-1 px-2 flex items-center rounded-sm duration-100 transition-colors">
+    <button onclick={handleClick} class="{toggledState ? ' bg-green-700 hover:bg-green-800' : ' bg-zinc-800 hover:bg-red-800'} text-sm text-white py-1 px-2 flex items-center rounded-sm duration-100 transition-colors">
         
         {#if props.label}
             {props.label}

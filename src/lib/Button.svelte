@@ -19,7 +19,7 @@ function handleClick(event) {
 }
 </script>
   
-<button onclick={handleClick} class="{props.class} flex justify-center items-center text-center bg-zinc-700 hover:bg-red-800 text-sm text-white py-1 px-2 rounded-sm duration-100 transition-colors">
+<button onclick={handleClick} class="{props.class} flex justify-center items-center text-center bg-zinc-800 hover:bg-red-800 text-sm text-white py-1 px-2 rounded-sm duration-100 transition-colors">
     
     {#if props.label}
         {props.label}

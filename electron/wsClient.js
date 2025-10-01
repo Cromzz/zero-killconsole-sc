@@ -1,135 +1,138 @@
 import WebSocket from 'ws';
-import config_store from './storage.js'
+import config_store from './storage.js';
 
-let ws;
+let ws = null;
 let status = false;
-let roomCode = config_store.get('groupCode');
+let roomCode = config_store.get('groupCode') || null;
 
-// Connect to the WebSocket server
-function connect() {
-  //ws = new WebSocket('ws://localhost:3000');
-  ws = new WebSocket('wss://killconsole-sc-group-production.up.railway.app');
+const remoteEventCallbacks = new Set();
+
+const DEFAULT_URL = process.env.GROUP_SERVER_URL || 'wss://killconsole-sc-group-production.up.railway.app';
+
+function connect(url = DEFAULT_URL) {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+  ws = new WebSocket(url);
 
   ws.on('open', () => {
-    console.log('Connected to server');
+    console.log('Connected to group server');
     status = true;
+    const saved = config_store.get('groupCode');
+    if (saved) {
+      // attempt to re-join saved room, best-effort
+      try { ws.send(JSON.stringify({ type: 'join', code: saved })); roomCode = saved; } catch (e) {}
+    }
   });
 
-  ws.on('message', (data) => {
+  ws.on('message', (raw) => {
     try {
-      const message = JSON.parse(data);
-      
-      if (message.type === 'create') {
+      const message = typeof raw === 'string' ? JSON.parse(raw) : JSON.parse(raw.toString());
+      for (const cb of remoteEventCallbacks) {
+        try { cb(message); } catch (e) { console.error('remoteEvent callback error', e); }
+      }
+
+      if (message.type === 'fresh-code') {
         roomCode = message.code;
-        config_store.set('groupCode', roomCode); //setting new code to storage for later collection
-        console.log(`\n✅ Group created with code: ${roomCode}`);
-      } 
-      else if (message.type === 'joined') {
-        console.log(`\n✅ Successfully joined room: ${message.code}`);
+        config_store.set('groupCode', roomCode);
+        console.log('Group created with code:', roomCode);
+      } else if (message.type === 'joined') {
+        roomCode = message.code;
+        config_store.set('groupCode', roomCode);
+        console.log('Joined room:', roomCode);
+      } else if (message.type === 'error') {
+        console.error('Group server error:', message.message);
       }
-      else if (message.type === 'error') {
-        console.error(`\n❌ Error: ${message.message}`);
-      }
-      else if (message.type === 'kill') {
-        console.log(`\n🔫 Kill command received from another client!`);
-      }
-    
+
     } catch (err) {
-      console.error('Error processing message:', err);
+      console.error('Error processing message from group server:', err);
     }
   });
 
   ws.on('close', () => {
     status = false;
-    console.log('\nDisconnected from group server');
+    console.log('Disconnected from group server');
   });
 
-  ws.on('error', (error) => {
+  ws.on('error', (err) => {
     status = false;
-    console.error('WebSocket error:', error);
+    console.error('WebSocket error:', err);
   });
 }
 
 function getCurrentGroupCode() {
-  if (status && roomCode) {
-    console.log("group code queried found", config_store.get('groupCode'));
-    return config_store.get('groupCode');
-  }
+  return config_store.get('groupCode') || null;
 }
 
-async function generateNewCode() {
-  const timeoutMs = 10000;
-  
-  if (!status) {
-    connect();
-  }
-
-  console.log("requesting new code from service");
-  ws.send(JSON.stringify({ type: "create" }));
-
+function generateNewCode(timeoutMs = 10000) {
+  if (!ws) connect();
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      reject(new Error("Timed out waiting for fresh-code response"));
-    }, timeoutMs);
+    const timer = setTimeout(() => reject(new Error('Timed out waiting for fresh-code response')), timeoutMs);
 
-    ws.addEventListener("message", function handler(event) {
+    function handler(raw) {
       try {
-        const data = JSON.parse(event.data);
-
-        if (data.type === "fresh-code") {
+        const data = typeof raw === 'string' ? JSON.parse(raw) : JSON.parse(raw.toString());
+        if (data.type === 'fresh-code') {
           clearTimeout(timer);
-          ws.removeEventListener("message", handler);
-
-          const roomCode = data.code;
-          config_store.set("groupCode", roomCode);
-          
-          resolve(roomCode);
+          ws.removeListener('message', handler);
+          config_store.set('groupCode', data.code);
+          roomCode = data.code;
+          return resolve(data.code);
         }
-      } catch (err) {
-        // ignore malformed messages, don’t reject the whole promise
-        console.error("Error parsing ws message", err);
+      } catch (e) {
+        // ignore malformed
       }
-    });
+    }
+
+    ws.on('message', handler);
+    try { ws.send(JSON.stringify({ type: 'create' })); } catch (err) { clearTimeout(timer); ws.removeListener('message', handler); return reject(err); }
   });
 }
 
+function joinRoom(code) {
+  if (!code) return Promise.reject(new Error('Missing room code'));
+  if (!ws) connect();
+  try {
+    ws.send(JSON.stringify({ type: 'join', code }));
+    roomCode = code.toUpperCase();
+    config_store.set('groupCode', roomCode);
+    return Promise.resolve(roomCode);
+  } catch (err) {
+    return Promise.reject(err);
+  }
+}
+
+function leaveRoom() {
+  if (!ws || !roomCode) return;
+  try { ws.send(JSON.stringify({ type: 'leave' })); } catch (e) {}
+  roomCode = null;
+  config_store.set('groupCode', null);
+}
 
 function getGroupServerStatus() {
-
-  return status; //just return the current group server status TODO: make this return the number of people in the group
+  return !!status;
 }
 
-function toggleStatus(force)
-{
-  if (force) {
-    console.log("forced group server status to", force);
-    status = force;
+function toggleStatus(force) {
+  if (typeof force === 'boolean') {
+    if (force && !status) { connect(); return true; }
+    if (!force && status) { try { ws.close(); } catch (e) {} status = false; return false; }
+    return status;
   }
-
-  if (status) {
-    ws.close();
-    status = false;
-  }
-  else {
-    connect();
-    status = true;
-  }
-
-  return status
+  if (status) { try { ws.close(); } catch (e) {} status = false; return false; }
+  connect(); status = true; return true;
 }
 
-function sendRemoteGroupEvent(event, data) {
-  if (status && roomCode) {
-    ws.send(JSON.stringify({ type: "event", event, data, code: roomCode }));
-    console.log("sent remote event", event, data);
-  }
+function sendRemoteGroupEvent(eventName, data) {
+  if (!status) return false;
+  if (!roomCode) return false;
+  if (!ws || ws.readyState !== WebSocket.OPEN) return false;
+  const payload = { type: 'kill', event: eventName, payload: data, code: roomCode };
+  try { ws.send(JSON.stringify(payload)); return true; } catch (e) { console.error('Failed to send remote group event', e); return false; }
 }
 
 function onRemoteGroupEvent(callback) {
-  if (!status) {
-    console.error("Cannot listen for remote events when not connected to group server");
-    return;
-  }
+  if (typeof callback !== 'function') return () => {};
+  remoteEventCallbacks.add(callback);
+  return () => remoteEventCallbacks.delete(callback);
 }
 
 export {
@@ -139,5 +142,7 @@ export {
   getGroupServerStatus,
   toggleStatus,
   sendRemoteGroupEvent,
-  onRemoteGroupEvent
-}
+  onRemoteGroupEvent,
+  joinRoom,
+  leaveRoom,
+};

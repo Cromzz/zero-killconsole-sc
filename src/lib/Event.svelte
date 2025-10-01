@@ -169,7 +169,7 @@ const handleIncapPosRight = () => {
 
 {#each killEvents as kill}
 
-<div class="event select-none flex h-18 justify-left items-center space-x-1 rounded relative bg-gradient-to-l from-red-900 to-red-800 shadow hover:cursor-pointer">
+<div class="event flex h-18 justify-left items-center space-x-1 rounded relative bg-gradient-to-l from-red-900 to-red-800 shadow hover:cursor-pointer">
     <div class="p-1 m-1 w-8 h-8 m-1 ml-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="ionicon" fill="white" viewBox="0 0 512 512"><path d="M256 16C141.31 16 48 109.31 48 224v154.83l82 32.81L146.88 496H192v-64h32v64h16v-64h32v64h16v-64h32v64h45.12L382 411.64l82-32.81V224c0-114.69-93.31-208-208-208zm-88 320a56 56 0 1156-56 56.06 56.06 0 01-56 56zm51.51 64L244 320h24l24.49 80zM344 336a56 56 0 1156-56 56.06 56.06 0 01-56 56zm104 32z"/></svg>
     </div>
