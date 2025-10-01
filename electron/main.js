@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { splitEntriesByTimestamp, parseKillEntry, parseIncapEntry } from './logParser.js';
 import googleTTS from 'google-tts-api';
 import config_store from './storage.js'
-import {getCurrentGroupCode, generateNewCode, getGroupServerStatus, toggleStatus} from './wsClient.js'
+import {getCurrentGroupCode, generateNewCode, getGroupServerStatus, toggleStatus, sendRemoteGroupEvent, onRemoteGroupEvent, joinRoom} from './wsClient.js'
 import { setupAutoUpdater } from './autoUpdater.js'; // adjust path accordingly
 
 import * as Sentry from "@sentry/electron";
@@ -23,6 +23,8 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
 let win; //this is the handle for our main window
 let overlayWindow; //this is the handle for our overlay window
+let LOG_FILE_PATH = path.resolve(config_store.get('gameDirectory') + '/Game.log')
+
 
 const getPreloadPath = () => {
   // When packaged, extraResources copy is placed in process.resourcesPath (next to app.asar)
@@ -211,6 +213,9 @@ ipcMain.handle('save-settings', async (event, settings) => {
     config_store.set('apiKey', settings.apiKey);
     config_store.set('ttsVolume', settings.ttsVolume);
     config_store.set('overlayPosition', settings.overlayPosition);
+
+    //update log file path with new game directory implemented to fix issue
+    LOG_FILE_PATH = path.resolve(config_store.get('gameDirectory') + '/Game.log')
     return true;
 }); 
 
@@ -275,18 +280,51 @@ ipcMain.handle('generate-group-code', async () => {
   return newCode;
 });
 
+// Allow renderer to set/join a code explicitly
+ipcMain.handle('set-group-code', async (event, code) => {
+  if (!code) return null;
+  try {
+    await joinRoom(code);
+    return getCurrentGroupCode();
+  } catch (err) {
+    console.error('Failed to join room', err);
+    return null;
+  }
+});
+
+// Renderer can request to send a remote event (e.g., when user clicks remote-kill button)
+ipcMain.on('remote-event', (event, { event: eventName, data }) => {
+  if (!eventName) return;
+  const sent = sendRemoteGroupEvent(eventName, data);
+  if (!sent) {
+    console.warn('Failed to send remote group event, make sure group server is connected and joined');
+  }
+});
+
+// Forward any incoming remote messages from the group server to renderer/overlay
+onRemoteGroupEvent((message) => {
+  try {
+    if (win) win.webContents.send('remote-event', message);
+    if (overlayWindow) overlayWindow.webContents.send('remote-event', message);
+  } catch (e) {
+    console.error('Failed to forward remote-event to renderer:', e);
+  }
+});
+
 function startGroupServerOnStartup() {
   if (config_store.get('groupStatus')) {
-    toggleStatus(false);
+    toggleStatus(true);
   }
 }
+
+
 ///////////// LOG READER /////////////
 
 let lastSize = 0;
 const processedEntries = new Set();
 
-let LOG_FILE_PATH = config_store.get('gameDirectory') ? 
-path.resolve(config_store.get('gameDirectory') + '/Game.log') : '';
+LOG_FILE_PATH = path.resolve(config_store.get('gameDirectory') + '/Game.log');
+
 
 
 setInterval(() => {
@@ -348,7 +386,28 @@ function readNewLogData() {
                 processedEntries.add(uniqueKey);
                 win.webContents.send('kill-event', killInfo);
                 //causing issues on some systems, needs more testing
-                if (overlayWindow.isVisible()) overlayWindow.webContents.send('kill-event', killInfo);
+                if (overlayWindow) overlayWindow.webContents.send('kill-event', killInfo);
+                else {
+                  console.log("No overlay window to send kill event to destroying overlay");
+                  overlayWindow.destroy();
+                  overlayWindow = false;
+                }
+                // If group server is enabled, forward a sanitized kill payload
+                try {
+                  if (config_store.get('groupStatus')) {
+                    // minimal payload to avoid exposing full logs
+                    const payload = {
+                      type: 'kill',
+                      timestamp: killInfo.timestamp,
+                      victimName: killInfo.victimName,
+                      killerName: killInfo.killerName,
+                      weapon: killInfo.weaponName || killInfo.weapon,
+                    };
+                    sendRemoteGroupEvent('kill', payload);
+                  }
+                } catch (e) {
+                  console.error('Failed to forward kill to group server', e);
+                }
               }
             }
           }
@@ -360,7 +419,22 @@ function readNewLogData() {
               if (!processedEntries.has(uniqueKey)) {
                 processedEntries.add(uniqueKey);
                 win.webContents.send('incap-event', incapInfo);
-                if (overlayWindow) overlayWindow.webContents.send('incap-event', incapInfo);
+                try {
+                  overlayWindow.webContents.send('incap-event', incapInfo);
+                } catch (e) {
+                  console.error('Failed to send incap event to overlay window', e);
+                }                try {
+                  if (config_store.get('groupStatus')) {
+                    const payload = {
+                      type: 'incap',
+                      timestamp: incapInfo.timestamp,
+                      victimName: incapInfo.victimName,
+                    };
+                    sendRemoteGroupEvent('incap', payload);
+                  }
+                } catch (e) {
+                  console.error('Failed to forward incap to group server', e);
+                }
               }
             }
           }
