@@ -2,6 +2,7 @@
 import 'animate.css';
 import Button from './Button.svelte';
 import { onMount } from 'svelte';
+import banner_settings from '../assets/banner_settings.png';
 
 
 const { onclose } = $props<{ onclose: () => void }>();
@@ -69,7 +70,7 @@ async function handleSaveSettings() {
 <div id="settingsModal" class="animate__animated animate__fadeIn bg-black/50 backdrop-blur backdrop-grayscale absolute z-50 inset-0 flex justify-center items-center shadow-lg">
     <div class="bg-zinc-900 p-4 rounded-sm max-w-3xl w-4/5 h-5/6 rounded-lg flex flex-col justify-between gap-4 relative ring-4 ring-zinc-800">
         <div class="flex flex-col">
-            <div class="w-full h-32 bg-cover bg-center rounded-sm absolute top-0 left-0 z-0 p-4" style="background-image: url('https://i.imgur.com/O9d0FnA.png')">
+            <div class="w-full h-32 bg-cover bg-center rounded-sm absolute top-0 left-0 z-0 p-4" style="background-image: url({banner_settings});">
 
             </div>
         </div>

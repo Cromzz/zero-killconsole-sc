@@ -5,6 +5,7 @@ import { fly } from 'svelte/transition';
 import Button from './Button.svelte';
 import ButtonStatus from './ButtonStatus.svelte';
 import { onMount } from 'svelte';
+import banner_group from '../assets/banner_group.png';
 
 export let onclose = () => {};
 
@@ -132,7 +133,7 @@ function updateGroupStatus(status) {
 
     <!-- Banner -->
     <div class="flex flex-col">
-      <div class="w-full h-32 bg-cover bg-center rounded-sm absolute top-0 left-0 z-0 p-4" style="background-image: url('https://i.imgur.com/HPIJK1D.png')"></div>
+      <div class="w-full h-32 bg-cover bg-center rounded-sm absolute top-0 left-0 z-0 p-4" style="background-image: url({banner_group});"></div>
     </div>
 
     <!-- Body -->

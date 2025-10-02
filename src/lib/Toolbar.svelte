@@ -8,6 +8,7 @@ import Button from './Button.svelte'
 import SettingsModal from './SettingsModal.svelte'
 import UpdateModal from './UpdateModal.svelte'
 import GroupModal from './GroupModal.svelte'
+import ButtonUser from './ButtonUser.svelte';
 
 
 let version = $state('');
@@ -89,8 +90,10 @@ const handleGroupClick = () => {
         {#if updateAvailable}
             <ButtonToggle onclick={() => showUpdateModal = true} label="Update Available!" icon="update" />
         {/if}
+        <!-- <ButtonUser onclick={handleGroupClick}/>     -->
         <Button onclick={handleGroupClick} label=" " icon="group" />
-        <ButtonToggle onclick={handleSettingsClick} label="Settings" icon="" />
+
+        <ButtonToggle onclick={handleSettingsClick} label="Settings"/>
         <Button onclick={handleWindowControlMin} label="" icon="minimize" />
         <Button onclick={handleWindowControlClose} label="" icon="close" />
     </div>
